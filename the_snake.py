@@ -220,8 +220,8 @@ def main():
         if snake.get_head_position() == apple.position:
             snake.length += 1
             apple.randomize_position()
-        if (snake.get_head_position() in snake.positions[1:] or
-                snake.get_head_position() == brick.position):
+        if (snake.get_head_position() in snake.positions[1:]
+                or snake.get_head_position() == brick.position):
             snake.reset()
             apple.randomize_position()
             rotten_apple.randomize_position()
