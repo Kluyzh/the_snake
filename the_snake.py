@@ -87,8 +87,12 @@ class Snake(GameObject):
 
     def check_the_length(self):
         """Проверка съедено ли яблоко."""
-        if len(self.positions) > self.length:
-            self.last = self.positions[-1]
+        if len(self.positions) - self.length == 1:
+            self.last = [self.positions[-1]]
+            self.positions.pop()
+        elif len(self.positions) - self.length > 1:
+            self.last = self.positions[-2:]
+            self.positions.pop()
             self.positions.pop()
 
     def move(self):
@@ -131,8 +135,9 @@ class Snake(GameObject):
         pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
 
         if self.last:
-            last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
-            pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
+            for last in self.last:
+                last_rect = pygame.Rect(last, (GRID_SIZE, GRID_SIZE))
+                pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def get_head_position(self) -> tuple:
         """Возвращает координаты головы змеи."""
@@ -193,12 +198,16 @@ def main():
     pygame.init()
     apple = Apple()
     apple.randomize_position()
+    rotten_apple = Apple()
+    rotten_apple.body_color = (255, 0, 255)
+    rotten_apple.randomize_position()
     snake = Snake()
 
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
         apple.draw()
+        rotten_apple.draw()
         snake.draw()
         snake.update_direction()
         snake.move()
@@ -210,6 +219,10 @@ def main():
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
             apple.randomize_position()
+        if snake.get_head_position() == rotten_apple.position:
+            rotten_apple.randomize_position()
+            if snake.length > 1:
+                snake.length -= 1
 
 
 if __name__ == '__main__':
