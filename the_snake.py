@@ -201,6 +201,9 @@ def main():
     rotten_apple = Apple()
     rotten_apple.body_color = (255, 0, 255)
     rotten_apple.randomize_position()
+    brick = Apple()
+    brick.body_color = (101, 67, 33)
+    brick.randomize_position()
     snake = Snake()
 
     while True:
@@ -208,6 +211,7 @@ def main():
         handle_keys(snake)
         apple.draw()
         rotten_apple.draw()
+        brick.draw()
         snake.draw()
         snake.update_direction()
         snake.move()
@@ -216,9 +220,12 @@ def main():
         if snake.get_head_position() == apple.position:
             snake.length += 1
             apple.randomize_position()
-        if snake.get_head_position() in snake.positions[1:]:
+        if (snake.get_head_position() in snake.positions[1:] or
+                snake.get_head_position() == brick.position):
             snake.reset()
             apple.randomize_position()
+            rotten_apple.randomize_position()
+            brick.randomize_position()
         if snake.get_head_position() == rotten_apple.position:
             rotten_apple.randomize_position()
             if snake.length > 1:
