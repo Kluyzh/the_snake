@@ -87,11 +87,10 @@ class Snake(GameObject):
         super().__init__(body_color=body_color)
         self.reset(direction=RIGHT)
 
-    def update_direction(self):
+    def update_direction(self, next_direction):
         """Метод обновления направления после нажатия на кнопку."""
-        if self.next_direction:
-            self.direction = self.next_direction
-            self.next_direction = None
+        if next_direction:
+            self.direction = next_direction
 
     def remove_last_rect(self):
         """Метод удалет последний квадрат змеики и затирает его."""
@@ -132,7 +131,6 @@ class Snake(GameObject):
         """Метод reset возвращает игру в изначальное положение."""
         self.length = 1
         self.positions = [self.position]
-        self.next_direction = None
         self.last = None
         self.direction = direction
 
@@ -194,12 +192,16 @@ def handle_keys(game_object):
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_UP and game_object.direction != DOWN:
                 game_object.next_direction = UP
+                return UP
             elif event.key == pg.K_DOWN and game_object.direction != UP:
                 game_object.next_direction = DOWN
+                return DOWN
             elif event.key == pg.K_LEFT and game_object.direction != RIGHT:
                 game_object.next_direction = LEFT
+                return LEFT
             elif event.key == pg.K_RIGHT and game_object.direction != LEFT:
                 game_object.next_direction = RIGHT
+                return RIGHT
 
 
 def main():
@@ -222,8 +224,7 @@ def main():
 
     while True:
         clock.tick(SPEED)
-        handle_keys(snake)
-        snake.update_direction()
+        snake.update_direction(handle_keys(snake))
         snake.move()
 
         if snake.get_head_position() == apple.position:
