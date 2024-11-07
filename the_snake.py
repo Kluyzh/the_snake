@@ -137,18 +137,18 @@ class Snake(GameObject):
         self.direction = direction
 
 
-class Apple(GameObject):
-    """Класс Apple, наследованный от класса GameObject.
+class Consumables(GameObject):
+    """Класс Consumables, наследованный от класса GameObject.
 
-    Объект этого класса является яблоком в игре, которое нужно съесть.
+    Объект этого класса является элементом в игре, которое можно съесть.
     """
 
-    def __init__(self, body_color=APPLE_COLOR):
-        """Инициализатор класса Apple."""
+    def __init__(self, body_color=None):
+        """Инициализатор класса Consumables."""
         super().__init__(body_color=body_color)
 
     def randomize_position(self, forbiden_cells):
-        """Случайным образом выбирает координаты для яблока."""
+        """Случайным образом выбирает координаты для съедобного элемента."""
         while True:
             random_x = randint(0, GRID_WIDTH - 1) * GRID_SIZE
             random_y = randint(0, GRID_HEIGHT - 1) * GRID_SIZE
@@ -157,20 +157,28 @@ class Apple(GameObject):
                 break
 
     def draw(self):
-        """Этот метод отрисовывает яблоко на игровом поле."""
+        """Этот метод отрисовывает съедобный элемент на игровом поле."""
         self.draw_rect(self.position)
 
 
-class RottenApple(Apple):
-    """Класс гнилое яблоко наследник от Apple."""
+class Apple(Consumables):
+    """Класс яблоко, наследованный от класса Consumables."""
+
+    def __init__(self, body_color=APPLE_COLOR):
+        """Инициализатор класса Apple."""
+        super().__init__(body_color=body_color)
+
+
+class RottenApple(Consumables):
+    """Класс гнилое яблоко наследник от Consumables."""
 
     def __init__(self, body_color=ROTTEN_APPLE_COLOR):
         """Иницилизатор класса RottenApple."""
         super().__init__(body_color=body_color)
 
 
-class Brick(Apple):
-    """Класс кирпич наследник от Apple."""
+class Brick(Consumables):
+    """Класс кирпич наследник от Consumables."""
 
     def __init__(self, body_color=BRICK_COLOR):
         """Иницилизатор класса Brick."""
