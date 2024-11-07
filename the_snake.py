@@ -138,10 +138,8 @@ class Snake(GameObject):
 
     def reset(self):
         """Метод reset возвращает игру в изначальное положение."""
-        self.length = 1
-        self.positions = [self.position]
+        self.__init__()
         self.direction = choice([RIGHT, LEFT, UP, DOWN])
-        self.last = None
 
 
 class Apple(GameObject):
