@@ -85,11 +85,7 @@ class Snake(GameObject):
         её цвет и другие параметры с изначальным значением.
         """
         super().__init__(body_color=body_color)
-        self.length = 1
-        self.positions = [self.position]
-        self.direction = RIGHT
-        self.next_direction = None
-        self.last = None
+        self.reset(direction=RIGHT)
 
     def update_direction(self):
         """Метод обновления направления после нажатия на кнопку."""
@@ -98,7 +94,7 @@ class Snake(GameObject):
             self.next_direction = None
 
     def remove_last_rect(self):
-        """Метод удалет последний квадрат змеики."""
+        """Метод удалет последний квадрат змеики и затирает его."""
         self.last = self.positions[-1]
         last_rect = pg.Rect(self.last, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
@@ -122,11 +118,7 @@ class Snake(GameObject):
             self.remove_last_rect()
 
     def draw(self):
-        """Метод draw класса Snake.
-
-        Отрисовывает голову змеи.
-        Затирает последний элемент змеи.
-        """
+        """Метод draw класса Snake. Отрисовывает змею."""
         for position in self.positions[:-1]:
             self.draw_rect(position)
 
@@ -136,10 +128,13 @@ class Snake(GameObject):
         """Возвращает координаты головы змеи."""
         return self.positions[0]
 
-    def reset(self):
+    def reset(self, direction=choice([RIGHT, LEFT, UP, DOWN])):
         """Метод reset возвращает игру в изначальное положение."""
-        self.__init__()
-        self.direction = choice([RIGHT, LEFT, UP, DOWN])
+        self.length = 1
+        self.positions = [self.position]
+        self.next_direction = None
+        self.last = None
+        self.direction = direction
 
 
 class Apple(GameObject):
@@ -152,19 +147,13 @@ class Apple(GameObject):
         """Инициализатор класса Apple."""
         super().__init__(body_color=body_color)
 
-    def randomize_position(
-            self,
-            occupied_snake_cells=(),
-            occupied_apple_cell=(),
-            occupied_rotten_cell=()):
+    def randomize_position(self, forbiden_cells):
         """Случайным образом выбирает координаты для яблока."""
         while True:
             random_x = randint(0, GRID_WIDTH - 1) * GRID_SIZE
             random_y = randint(0, GRID_HEIGHT - 1) * GRID_SIZE
             self.position = (random_x, random_y)
-            if (self.position not in occupied_snake_cells
-                    and self.position not in occupied_apple_cell
-                    and self.position not in occupied_rotten_cell):
+            if self.position not in forbiden_cells:
                 break
 
     def draw(self):
@@ -207,16 +196,21 @@ def handle_keys(game_object):
 
 def main():
     """Основная фунцкия игры, в который описан цикл, и правил игры."""
+    def occupied_cells() -> list:
+        cells = [cell for cell in snake.positions]
+        cells.append(apple.position)
+        cells.append(rotten_apple.position)
+        cells.append(brick.position)
+        return cells
+
     pg.init()
     snake = Snake()
     apple = Apple()
-    apple.randomize_position(snake.positions)
     rotten_apple = RottenApple()
-    rotten_apple.randomize_position(snake.positions, apple.position)
     brick = Brick()
-    brick.randomize_position(
-        snake.positions, apple.position, rotten_apple.position
-    )
+    apple.randomize_position(occupied_cells())
+    rotten_apple.randomize_position(occupied_cells())
+    brick.randomize_position(occupied_cells())
 
     while True:
         clock.tick(SPEED)
@@ -226,20 +220,16 @@ def main():
 
         if snake.get_head_position() == apple.position:
             snake.length += 1
-            apple.randomize_position(snake.positions)
+            apple.randomize_position(occupied_cells())
         if (snake.get_head_position() in snake.positions[1:]
                 or snake.get_head_position() == brick.position):
             snake.reset()
             screen.fill(BOARD_BACKGROUND_COLOR)
-            apple.randomize_position(snake.positions)
-            rotten_apple.randomize_position(snake.positions, apple.position)
-            brick.randomize_position(
-                snake.positions, apple.position, rotten_apple.position
-            )
+            apple.randomize_position(occupied_cells())
+            rotten_apple.randomize_position(occupied_cells())
+            brick.randomize_position(occupied_cells())
         if snake.get_head_position() == rotten_apple.position:
-            rotten_apple.randomize_position(
-                snake.positions, apple.position, brick.position
-            )
+            rotten_apple.randomize_position(occupied_cells())
             if snake.length > 1:
                 snake.length -= 1
 
